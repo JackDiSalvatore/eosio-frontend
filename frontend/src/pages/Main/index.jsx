@@ -12,9 +12,9 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 
 // Components
-import AccountDetails from '../AccountDetails';
-import TransferTokens from '../TransferTokens';
-//import SmartAccount from '../SmartAccount';
+//import AccountDetails from '../AccountDetails';
+//import TransferTokens from '../TransferTokens';
+import SmartAccount from '../SmartAccount';
 
 // set up styling classes using material-ui "withStyles"
 const styles = theme => ({
@@ -50,18 +50,19 @@ const styles = theme => ({
 
 // Endpoints;
 //const localNet = 'http://localhost:888';
+const localNet = 'http://127.0.0.1:8888';
 //const jungleTestNet = 'https://jungle2.cryptolions.io:443'
-const mainNet = 'http://bp.cryptolions.io:8888';
+//const mainNet = 'http://bp.cryptolions.io:8888';
 //const mainNetBackup = 'http://api.cypherglass.com:8888';
 
-const endpoint = mainNet;
+const endpoint = localNet;
 
 // NEVER store private keys in any source code in your real life development
 // This is for demo purposes only!
 const accounts = [
   {"name":"bob",          "privateKey":"5KLqT1UFxVnKRWkjvhFur4sECrPhciuUqsYRihc1p9rxhXQMZBg", "publicKey":"EOS78RuuHNgtmDv9jwAzhxZ9LmC6F295snyQ9eUDQ5YtVHJ1udE6p"},
+  {"name":"daniel",       "privateKey":"5K7mtrinTFrVTduSxizUc5hjXJEtTjVTsqSHeBHes1Viep86FP5", "publicKey":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b"},
   {"name":"jdisalvatore",       "privateKey":"5K7mtrinTFrVTduSxizUc5hjXJEtTjVTsqSHeBHes1Viep86FP5", "publicKey":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b"},
-  {"name":"daniel",       "privateKey":"5K7mtrinTFrVTduSxizUc5hjXJEtTjVTsqSHeBHes1Viep86FP5", "publicKey":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b"},  
 ];
 
 
@@ -181,23 +182,23 @@ class Index extends Component {
       rpc.get_info().then(result => this.setState({chainInfo: result}))
       rpc.get_account(accountName).then(result => this.setState({accountInfo: result}));
       rpc.get_currency_balance('eosio.token', accountName, 'EOS').then(result => this.setState({ eosBalance: result}));
-      rpc.get_table_rows({
-        json: true,
-        code: 'eosio',                // contract who owns the table
-        scope: 'eosio',               // scope of the table
-        table: 'rexbal',              // name of the table as specified by the contract abi
-        lower_bound: accountName,
-        limit: 1,                     // Here we limit to 1 to get only the
-        reverse: false,               // Optional: Get reversed data
-        show_payer: false,            // Optional: Show ram payer
-      }).then(result => this.setState({ rexBalance: result.rows[0] }));
+      // rpc.get_table_rows({
+      //   json: true,
+      //   code: 'eosio',                // contract who owns the table
+      //   scope: 'eosio',               // scope of the table
+      //   table: 'rexbal',              // name of the table as specified by the contract abi
+      //   lower_bound: accountName,
+      //   limit: 1,                     // Here we limit to 1 to get only the
+      //   reverse: false,               // Optional: Get reversed data
+      //   show_payer: false,            // Optional: Show ram payer
+      // }).then(result => this.setState({ rexBalance: result.rows[0] }));
     } catch (error) {
       console.log(error);
     }
   }
 
   componentDidMount() {
-    this.getAccountDetails('eosio');
+    this.getAccountDetails('daniel');
   }
 
   render() {
@@ -251,11 +252,11 @@ class Index extends Component {
 
         </AppBar>
 
-        {accountSearchCard}
+        {/* {accountSearchCard} */}
 
-        <AccountDetails accountInfo={accountInfo} eosBalance={eosBalance} rexBalance={rexBalance} endpoint={endpoint}></AccountDetails>
+        {/* <AccountDetails accountInfo={accountInfo} eosBalance={eosBalance} rexBalance={rexBalance} endpoint={endpoint}></AccountDetails> */}
         {/* <TransferTokens account={accounts[1]} accountInfo={accountInfo} endpoint={endpoint}></TransferTokens> */}
-        {/* <SmartAccount accounts={accounts} endpoint={endpoint}></SmartAccount> */}
+        <SmartAccount accounts={accounts} endpoint={endpoint}></SmartAccount>
       </div>
     );
   }

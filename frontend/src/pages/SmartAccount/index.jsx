@@ -134,7 +134,7 @@ class SmartAccount extends Component {
     //             "permission": "active"
     //           }
     //         ],
-    //         "data": "0000000044e5a64900000000001fa3c120a107000000000004454f53000000000d74657374206d756c7469736967"
+    //         "data": "0000000044e5a649202f9d34cfabb3ba02c01c9659cf8c55430000003ebbab91c20000000044e5a64900000059cf8c55439fa3ed5c00000000000000000000010000000000ea30550040cbdaa86c52d5010000000044e5a6490000000080ab26a7430000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f26200100000000"
     //       }
     //     ],
     //     "transaction_extensions": []
@@ -243,33 +243,55 @@ class SmartAccount extends Component {
         broadcast: false,
         sign: false
       });
-      //transfer.transaction.transaction.max_net_usage_words = 0; // bug fix
-      let txHeader = { 
-                transaction_header: {
-                  expiration: 1583284261,
-                  max_net_usage_words: 0,
-                }
-              };
-      const newUpdateAuthTransaction = Object.assign({}, updateAuthTransaction, txHeader );
-      // updateAuthTransaction.transaction_header.expiration = 100;
-      console.log(newUpdateAuthTransaction)
 
       // BUILD THE MULTISIG TRANSACTION
       actionData = {
         proposer: account,
-        proposal_name: 'goback',
+        proposal_name: 'returntonorm',
         requested: [
           {
-            'actor': 'chestnutmsig',
-            'permission': 'security'
+            actor: 'chestnutmsig',
+            permission: 'security'
           },
           {
-            'actor': account,
-            'permission': 'chestnut'
+            actor: account,
+            permission: 'chestnut'
           }
         ],
-        trx: newUpdateAuthTransaction
+        trx: {
+              expiration: '2020-04-22T16:39:15',
+              ref_block_num: 0,
+              ref_block_prefix: 0,
+              max_net_usage_words: 0,
+              max_cpu_usage_ms: 0,
+              delay_sec: 0,
+              context_free_actions: [],
+              actions: [
+                {
+                  account: 'eosio',
+                  name: 'updateauth',
+                  authorization: [
+                    {
+                      actor: account,
+                      permission: 'active'
+                    }
+                  ],
+                  data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
+                }
+              ],
+              transaction_extensions: []
+            }
       };
+
+      // actionData = {
+      //   from: account,
+      //   to: 'bob',
+      //   quantity: '1.0000 EOS',
+      //   memo: 'memo'
+      // }
+
+      console.log(actionData)
+      console.log(updateAuthTransaction)
 
       // SEND THE MULTISIG
       try {
@@ -279,17 +301,19 @@ class SmartAccount extends Component {
             name: 'propose',
             authorization: [{
               actor: account,
-              permission: 'active',
+              permission: 'chestnut',
             }],
             data: actionData,
           }]
         }, {
           blocksBehind: 3,
           expireSeconds: 30,
+          broadcast: true,
+          sign: true
         });
   
-        console.log(result);
-        this.getAccountDetails();
+        // console.log(result);
+        // this.getAccountDetails();
       } catch (e) {
         console.log('Caught exception: ' + e);
         if (e instanceof RpcError) {
@@ -300,17 +324,6 @@ class SmartAccount extends Component {
     } catch (error) {
         console.log(error);
     }
-
-    // FROM GITHUB
-    // const transfer = await eos.transfer('daniel', 'chestnutmsig', '1.0000 EOS', '', {broadcast: false, sign: false})
-    // transfer.transaction.transaction.max_net_usage_words = 0 // bug fix
-    // console.log(transfer.transaction.transaction)
-    
-    // const msig = await eos.contract('eosio.msig')
-    
-    // const randomName = String(Math.round(Math.random() * 100000)).replace(/[0,6-9]/g, '')
-    // const propose = await msig.propose('chestnutmsig', 'jungle.' + randomName, [{actor: 'daniel', permission: 'active'}], transfer.transaction.transaction)
-    // console.info(propose)
 
   }
 

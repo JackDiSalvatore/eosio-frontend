@@ -212,37 +212,6 @@ class SmartAccount extends Component {
 
     try {
       // CREATE ACTION TO PROPOSE
-      const updateAuthTransaction = await api.transact({
-        actions: [{
-          account: 'eosio',
-          name: 'updateauth',
-          authorization: [{
-            actor: account,
-            permission: 'active',
-          }],
-          data: {
-            account: account,
-            permission: 'owner',
-            parent: '',
-            auth: {
-              keys: [
-                {
-                  key: publicKey,
-                  weight: 1
-                }
-              ],
-              threshold: 1,
-              accounts: [],
-              waits: []
-            }
-          },
-        }]
-      }, {
-        blocksBehind: 3,
-        expireSeconds: 30,
-        broadcast: false,
-        sign: false
-      });
 
       // BUILD THE MULTISIG TRANSACTION
       actionData = {
@@ -268,12 +237,12 @@ class SmartAccount extends Component {
               context_free_actions: [],
               actions: [
                 {
-                  account: 'eosio',
-                  name: 'updateauth',
+                  account: 'eosio.msig',
+                  name: 'propose',
                   authorization: [
                     {
                       actor: account,
-                      permission: 'active'
+                      permission: 'chestnut'
                     }
                   ],
                   data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
@@ -290,8 +259,8 @@ class SmartAccount extends Component {
       //   memo: 'memo'
       // }
 
-      console.log(actionData)
-      console.log(updateAuthTransaction)
+      //console.log(actionData)
+      //console.log(updateAuthTransaction)
 
       // SEND THE MULTISIG
       try {

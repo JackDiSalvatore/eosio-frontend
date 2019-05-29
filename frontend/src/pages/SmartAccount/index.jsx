@@ -236,7 +236,7 @@ class SmartAccount extends Component {
           accounts:[],
           waits:[]
         }
-      });
+      })
       console.log(updateAuthAction.toBytes())
 
       // BUILD THE MULTISIG PROPOSE TRANSACTION
@@ -263,19 +263,19 @@ class SmartAccount extends Component {
               context_free_actions: [],
               actions: [
                 {
-                  account: 'eosio.msig',
-                  name: 'propose',
+                  account: 'eosio',
+                  name: 'updateauth',
                   authorization: [
                     {
                       actor: account,
-                      permission: 'chestnut'
+                      permission: 'owner'
                     }
                   ],
                   // Figure out how to go from
                   // '{"account": "daniel", "permission": "owner", "parent": "", "auth": {"keys":[{"key":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b", "weight":1}],"threshold":1,"accounts":[],"waits":[]}}"}'
                   // to
-                  //data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
-                  data: updateAuthAction.toBytes()
+                  data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
+                  //data: updateAuthAction.toBytes()
                 }
               ],
               transaction_extensions: []
@@ -300,7 +300,7 @@ class SmartAccount extends Component {
           broadcast: true,
           sign: true
         });
-        // console.log(result);
+        console.log(result);
 
       } catch (e) {
         console.log('Caught exception: ' + e);
@@ -334,7 +334,7 @@ class SmartAccount extends Component {
           broadcast: true,
           sign: true
         });
-        // console.log(approveTx);
+        console.log(approveTx);
 
       } catch (e) {
         console.log('Caught exception: ' + e);
@@ -344,6 +344,34 @@ class SmartAccount extends Component {
       }
 
       // SEND LEAVE ACTION
+      try {
+        const leaveTx = await api.transact({
+          actions: [{
+            account: 'chestnutmsig',
+            name: 'leave',
+            authorization: [{
+              actor: account,
+              permission: 'chestnut',
+            }],
+            data: {
+              proposer: account,
+              proposal_name: 'returntonorm'
+            },
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 30,
+          broadcast: true,
+          sign: true
+        });
+        console.log(leaveTx);
+
+      } catch (e) {
+        console.log('Caught exception: ' + e);
+        if (e instanceof RpcError) {
+          console.log(JSON.stringify(e.json, null, 2));
+        }
+      }
 
       // SEND UNLINK AUTH
 

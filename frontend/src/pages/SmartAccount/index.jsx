@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Api, JsonRpc, RpcError } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
 
+import { ABI } from 'eos-abi';
+
 // material-ui dependencies
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -204,16 +206,40 @@ class SmartAccount extends Component {
 
     // eosjs function call: connect to the blockchain
     const signatureProvider = new JsSignatureProvider([privateKey]);
-    //const rpc = new JsonRpc(this.props.endpoint);
-    const rpc = new JsonRpc('http://127.0.0.1:8888');
-    //const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+    const rpc = new JsonRpc(this.props.endpoint);
+    //const rpc = new JsonRpc('http://127.0.0.1:8888');
     const api = new Api({ rpc, signatureProvider });
 
 
     try {
-      // CREATE ACTION TO PROPOSE
+      const abi = new ABI();
 
-      // BUILD THE MULTISIG TRANSACTION
+
+      // CREATE ACTION TO PROPOSE
+      const updateAuthAction = abi.createActionData({
+        account: 'name',
+        permission: 'name',
+        parent: 'name',
+        auth: 'authority'
+      },{
+        account: 'daniel',
+        permission: 'owner',
+        parent: '',
+        auth: {
+          keys: [
+            {
+              key: 'EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b',
+              weight: 1
+            }
+          ],
+          threshold: 1,
+          accounts:[],
+          waits:[]
+        }
+      });
+      console.log(updateAuthAction.toBytes())
+
+      // BUILD THE MULTISIG PROPOSE TRANSACTION
       actionData = {
         proposer: account,
         proposal_name: 'returntonorm',
@@ -245,24 +271,18 @@ class SmartAccount extends Component {
                       permission: 'chestnut'
                     }
                   ],
-                  data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
+                  // Figure out how to go from
+                  // '{"account": "daniel", "permission": "owner", "parent": "", "auth": {"keys":[{"key":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b", "weight":1}],"threshold":1,"accounts":[],"waits":[]}}"}'
+                  // to
+                  //data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
+                  data: updateAuthAction.toBytes()
                 }
               ],
               transaction_extensions: []
             }
       };
 
-      // actionData = {
-      //   from: account,
-      //   to: 'bob',
-      //   quantity: '1.0000 EOS',
-      //   memo: 'memo'
-      // }
-
-      //console.log(actionData)
-      //console.log(updateAuthTransaction)
-
-      // SEND THE MULTISIG
+      // SEND THE MULTISIG PROPOSE
       try {
         const result = await api.transact({
           actions: [{
@@ -280,15 +300,52 @@ class SmartAccount extends Component {
           broadcast: true,
           sign: true
         });
-  
         // console.log(result);
-        // this.getAccountDetails();
+
       } catch (e) {
         console.log('Caught exception: ' + e);
         if (e instanceof RpcError) {
           console.log(JSON.stringify(e.json, null, 2));
         }
       }
+
+      // SEND MULTISIG APPROVE
+      try {
+        const approveTx = await api.transact({
+          actions: [{
+            account: 'eosio.msig',
+            name: 'approve',
+            authorization: [{
+              actor: account,
+              permission: 'chestnut',
+            }],
+            data: {
+              proposer: account,
+              proposal_name: 'returntonorm',
+              level: {
+                actor:  account,
+                permission: 'chestnut'
+              }
+            },
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 30,
+          broadcast: true,
+          sign: true
+        });
+        // console.log(approveTx);
+
+      } catch (e) {
+        console.log('Caught exception: ' + e);
+        if (e instanceof RpcError) {
+          console.log(JSON.stringify(e.json, null, 2));
+        }
+      }
+
+      // SEND LEAVE ACTION
+
+      // SEND UNLINK AUTH
 
     } catch (error) {
         console.log(error);

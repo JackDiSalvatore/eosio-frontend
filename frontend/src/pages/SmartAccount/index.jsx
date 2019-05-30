@@ -216,28 +216,37 @@ class SmartAccount extends Component {
 
 
       // CREATE ACTION TO PROPOSE
-      const updateAuthAction = abi.createActionData({
-        account: 'name',
-        permission: 'name',
-        parent: 'name',
-        auth: 'authority'
-      },{
-        account: 'daniel',
-        permission: 'owner',
-        parent: '',
-        auth: {
-          keys: [
-            {
-              key: 'EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b',
-              weight: 1
+      let actions = [
+        {
+          account: 'eosio',
+          name: 'updateauth',
+          authorization: [
+            { 
+              actor: account,
+              permission: 'owner',
             }
-          ],
-          threshold: 1,
-          accounts:[],
-          waits:[]
+          ], data: {
+            account: 'daniel',
+            permission: 'owner',
+            parent: '',
+            auth: {
+              threshold: 1,
+              keys: [
+                {
+                  key: 'EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b',
+                  weight: 1
+                }
+              ],
+              accounts:[],
+              waits:[]
+            }
+          },
         }
-      })
-      console.log(updateAuthAction.toBytes())
+      ]
+      
+      let seActions = await api.serializeActions(actions)
+      console.log(seActions[0].data)
+
 
       // BUILD THE MULTISIG PROPOSE TRANSACTION
       actionData = {
@@ -274,8 +283,8 @@ class SmartAccount extends Component {
                   // Figure out how to go from
                   // '{"account": "daniel", "permission": "owner", "parent": "", "auth": {"keys":[{"key":"EOS6kYgMTCh1iqpq9XGNQbEi8Q6k5GujefN9DSs55dcjVyFAq7B6b", "weight":1}],"threshold":1,"accounts":[],"waits":[]}}"}'
                   // to
-                  data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
-                  //data: updateAuthAction.toBytes()
+                  //data: '0000000044e5a6490000000080ab26a7000000000000000001000000010002f55b7f0ecae584df36fcbe3d8b6bb393a2f472c834fcb08caa955709c94f262001000000'
+                  data: seActions[0].data
                 }
               ],
               transaction_extensions: []
@@ -365,7 +374,7 @@ class SmartAccount extends Component {
           sign: true
         });
         console.log(leaveTx);
-
+        this.getAccountDetails();
       } catch (e) {
         console.log('Caught exception: ' + e);
         if (e instanceof RpcError) {

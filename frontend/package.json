@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "@material-ui/core": "^1.5.1",
-    "eos-abi": "^0.1.1",
     "eosjs": "^20.0.0",
     "merge": "^1.2.1",
     "react": "^16.4.2",

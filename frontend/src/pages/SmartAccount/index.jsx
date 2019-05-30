@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { Api, JsonRpc, RpcError } from 'eosjs';
 import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
 
-import { ABI } from 'eos-abi';
-
 // material-ui dependencies
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -212,9 +210,6 @@ class SmartAccount extends Component {
 
 
     try {
-      const abi = new ABI();
-
-
       // CREATE ACTION TO PROPOSE
       let actions = [
         {
